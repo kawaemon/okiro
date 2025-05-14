@@ -1,6 +1,8 @@
 from voicevox_core.blocking import Onnxruntime, Synthesizer, OpenJtalk, VoiceModelFile
 import subprocess
 
+VOLUME = "4.5"
+
 class Tts:
     ZUNDAMON_MODEL=0
     ZUNDAMON_STYLE = 3
@@ -18,7 +20,7 @@ class Tts:
 
     def speak(self, txt: str) -> None:
         wav = self.synth.tts(txt, self.ZUNDAMON_STYLE)
-        proc = subprocess.Popen(["ffplay", "-autoexit", "-hide_banner", "-"], stdin=subprocess.PIPE)
+        proc = subprocess.Popen(["ffplay", "-autoexit", "-hide_banner", "-af", f"volume={VOLUME}", "-"], stdin=subprocess.PIPE)
         proc.stdin.write(wav)
         proc.stdin.flush()
         proc.stdin.close()
@@ -137,6 +139,8 @@ def wait_until(target_time):
 
 def main():
     tts = Tts()
+    tts.speak("起動しました")
+
     # スケジュール読み込み
     spec = Schedule("spec.txt")
 
