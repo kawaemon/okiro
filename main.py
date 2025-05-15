@@ -3,28 +3,36 @@ import subprocess
 
 VOLUME = "4.5"
 
+
 class Tts:
-    ZUNDAMON_MODEL=0
+    ZUNDAMON_MODEL = 0
     ZUNDAMON_STYLE = 3
 
     def __init__(self) -> None:
-        onnx = Onnxruntime.load_once(filename="./voicevox_core/onnxruntime/lib/libvoicevox_onnxruntime.1.17.3.dylib")
-        synth = Synthesizer(
-            onnx,
-            OpenJtalk("./voicevox_core/dict/open_jtalk_dic_utf_8-1.11")
+        onnx = Onnxruntime.load_once(
+            filename="./voicevox_core/onnxruntime/lib/libvoicevox_onnxruntime.1.17.3.dylib"
         )
-        with VoiceModelFile.open(f"./voicevox_core/models/vvms/{self.ZUNDAMON_MODEL}.vvm") as model:
+        synth = Synthesizer(
+            onnx, OpenJtalk("./voicevox_core/dict/open_jtalk_dic_utf_8-1.11")
+        )
+        with VoiceModelFile.open(
+            f"./voicevox_core/models/vvms/{self.ZUNDAMON_MODEL}.vvm"
+        ) as model:
             synth.load_voice_model(model)
 
         self.synth = synth
 
     def speak(self, txt: str) -> None:
         wav = self.synth.tts(txt, self.ZUNDAMON_STYLE)
-        proc = subprocess.Popen(["ffplay", "-autoexit", "-hide_banner", "-af", f"volume={VOLUME}", "-"], stdin=subprocess.PIPE)
+        proc = subprocess.Popen(
+            ["ffplay", "-autoexit", "-hide_banner", "-af", f"volume={VOLUME}", "-"],
+            stdin=subprocess.PIPE,
+        )
         proc.stdin.write(wav)
         proc.stdin.flush()
         proc.stdin.close()
         proc.wait()
+
 
 """
 以下 Claude 3.7 Sonnet で半バイブスコーディング
@@ -70,6 +78,7 @@ while True:
 from datetime import datetime, timedelta
 import time
 
+
 class Schedule:
     def __init__(self, filename):
         self.events = []
@@ -77,26 +86,26 @@ class Schedule:
         self.calculate_wake_up_time()
 
     def parse_data_from(self, filename):
-        with open(filename, 'r') as file:
+        with open(filename, "r") as file:
             lines = file.readlines()
 
         # 最初の行は目標時間とイベント名
         first_line = lines[0].strip().split()
-        target_time = datetime.strptime(first_line[0], '%H:%M').time()
-        target_event = ' '.join(first_line[1:])
+        target_time = datetime.strptime(first_line[0], "%H:%M").time()
+        target_event = " ".join(first_line[1:])
 
         # 残りの行は準備イベントとそれぞれにかかる時間
         prep_events = []
         for line in reversed(lines[1:]):
             parts = line.strip().split()
             duration_str = parts[0]
-            event_name = ' '.join(parts[1:])
+            event_name = " ".join(parts[1:])
 
             # 時間単位の変換
-            if 'h' in duration_str:
-                duration_minutes = int(duration_str.replace('h', '')) * 60
+            if "h" in duration_str:
+                duration_minutes = int(duration_str.replace("h", "")) * 60
             else:
-                duration_minutes = int(duration_str.replace('m', ''))
+                duration_minutes = int(duration_str.replace("m", ""))
 
             prep_events.append((event_name, duration_minutes))
 
@@ -123,6 +132,7 @@ class Schedule:
                 return event_name, int(minutes_until)
         return None, None
 
+
 def wait_until(target_time):
     """指定された時間まで待機する"""
     now = datetime.now()
@@ -134,8 +144,11 @@ def wait_until(target_time):
     wait_seconds = (target_time - now).total_seconds()
 
     if wait_seconds > 0:
-        print(f"Waiting until {target_time.strftime('%H:%M')} ({wait_seconds:.0f} seconds)")
+        print(
+            f"Waiting until {target_time.strftime('%H:%M')} ({wait_seconds:.0f} seconds)"
+        )
         time.sleep(wait_seconds)
+
 
 def main():
     tts = Tts()
@@ -163,7 +176,7 @@ def main():
         after = datetime.now()
 
         # 5分待機
-        waitsecs = 60*5 - (after-before).seconds
+        waitsecs = 60 * 5 - (after - before).seconds
         print(f"waiting for {waitsecs}secs")
         time.sleep(waitsecs)
 
