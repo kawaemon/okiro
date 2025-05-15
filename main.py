@@ -162,8 +162,8 @@ def main():
             tts.speak(f"{event}まであと{minutes_until}分です")
         after = datetime.now()
 
-        # 1分待機
-        waitsecs = 60 - (after-before).seconds
+        # 5分待機
+        waitsecs = 60*5 - (after-before).seconds
         print(f"waiting for {waitsecs}secs")
         time.sleep(waitsecs)
 
